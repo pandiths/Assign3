@@ -1,0 +1,34 @@
+.container-slide {
+    display: flex;
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  
+  .tab-content {
+    flex: 1;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+  
+  .tab-content.hidden {
+    display: none; /* Hide the table completely */
+  }
+  
+  .details-content {
+    flex: 1;
+    width: 100%; /* Make details take full width */
+    opacity: 0;
+    display: none; /* Initially hidden */
+    transition: opacity 0.3s ease;
+  }
+  
+  .container-slide.show-details .tab-content {
+    transform: translateX(-100%); /* Slide the table out */
+    opacity: 0; /* Fade out the table */
+    pointer-events: none; /* Disable interactions when hidden */
+  }
+  
+  .container-slide.show-details .details-content {
+    display: block;
+    opacity: 1; /* Fade in the details component */
+  }
+  
