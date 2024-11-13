@@ -4,7 +4,7 @@ export const fetchData = async (
   setHourlyData: any
 ) => {
   const response = await fetch(
-    `http://assign3.us-east-2.elasticbeanstalk.com/api/hourly?lat=${lat}&long=${long}`
+    `https://api.skanda20.click/api/hourly?lat=${lat}&long=${long}`
   );
   const res = await response.json();
   const intervals = res.data.timelines[0].intervals;

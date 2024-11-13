@@ -57,7 +57,7 @@ const WeatherApp: React.FC = () => {
     const fetchFavorites = async () => {
       try {
         const response = await fetch(
-          "http://assign3.us-east-2.elasticbeanstalk.com/api/favorites"
+          "https://api.skanda20.click/api/favorites"
         );
         if (response.ok) {
           const data = await response.json();
@@ -95,7 +95,7 @@ const WeatherApp: React.FC = () => {
       try {
         fetchData(lat, long, setHourlyData);
         const response = await fetch(
-          `http://assign3.us-east-2.elasticbeanstalk.com/api/weather?lat=${lat}&long=${long}`
+          `https://api.skanda20.click/api/weather?lat=${lat}&long=${long}`
         );
         if (!response.ok) throw new Error("Network response was not ok");
 
@@ -159,7 +159,7 @@ const WeatherApp: React.FC = () => {
     if (!isDuplicate) {
       try {
         const response = await fetch(
-          "http://assign3.us-east-2.elasticbeanstalk.com/api/favorites",
+          "https://api.skanda20.click/api/favorites",
           {
             method: "POST",
             headers: {
@@ -198,16 +198,13 @@ const WeatherApp: React.FC = () => {
 
   const handleRemoveFavorite = async (cityName: string, region: string) => {
     try {
-      const response = await fetch(
-        `http://assign3.us-east-2.elasticbeanstalk.com/api/favorites`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ cityName, region }),
-        }
-      );
+      const response = await fetch(`https://api.skanda20.click/api/favorites`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ cityName, region }),
+      });
 
       if (response.ok) {
         setFavorites((prevFavorites) =>
