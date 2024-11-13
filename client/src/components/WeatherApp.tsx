@@ -56,7 +56,9 @@ const WeatherApp: React.FC = () => {
   useEffect(() => {
     const fetchFavorites = async () => {
       try {
-        const response = await fetch("/api/favorites");
+        const response = await fetch(
+          "http://assign3.us-east-2.elasticbeanstalk.com/api/favorites"
+        );
         if (response.ok) {
           const data = await response.json();
           setFavorites(data);
@@ -81,19 +83,20 @@ const WeatherApp: React.FC = () => {
     const lat = coordinates?.latitude || data.latitude;
     const long = coordinates?.longitude || data.longitude;
 
-    
     if (lat && long) {
       setLoading(true);
       setError(null);
       setProgress(0); // Reset progress for a new search
-      
+
       const progressInterval = setInterval(() => {
         setProgress((prev) => (prev < 100 ? prev + 20 : 100)); // Simulate progress
       }, 300);
-      
+
       try {
-        fetchData(lat,long,setHourlyData)
-        const response = await fetch(`/api/weather?lat=${lat}&long=${long}`);
+        fetchData(lat, long, setHourlyData);
+        const response = await fetch(
+          `http://assign3.us-east-2.elasticbeanstalk.com/api/weather?lat=${lat}&long=${long}`
+        );
         if (!response.ok) throw new Error("Network response was not ok");
 
         const weatherApiResponse = await response.json();
@@ -155,18 +158,21 @@ const WeatherApp: React.FC = () => {
 
     if (!isDuplicate) {
       try {
-        const response = await fetch("/api/favorites", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            cityName,
-            region,
-            coordinates,
-            data: weatherData,
-          }),
-        });
+        const response = await fetch(
+          "http://assign3.us-east-2.elasticbeanstalk.com/api/favorites",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              cityName,
+              region,
+              coordinates,
+              data: weatherData,
+            }),
+          }
+        );
 
         if (response.ok) {
           setFavorites((prevFavorites) => [
@@ -192,13 +198,16 @@ const WeatherApp: React.FC = () => {
 
   const handleRemoveFavorite = async (cityName: string, region: string) => {
     try {
-      const response = await fetch(`/api/favorites`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ cityName, region }),
-      });
+      const response = await fetch(
+        `http://assign3.us-east-2.elasticbeanstalk.com/api/favorites`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ cityName, region }),
+        }
+      );
 
       if (response.ok) {
         setFavorites((prevFavorites) =>
