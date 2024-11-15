@@ -1,9 +1,28 @@
 const express = require("express");
 const { MongoClient } = require("mongodb");
+const path = require("path");
+const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 8080;
 require("dotenv").config();
 
+app.use(
+  cors({
+    origin: "https://skanda20.click",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
+
+// Serve the static files from the React app
+// app.use(express.static(path.join(__dirname, "../client/build")));
+
+// // Handle all unmatched routes by serving the React app's index.html
+// app.get("*", (req, res) => {
+//   res.sendFile(path.join(__dirname, "../client/build", "index.html"));
+// });
+
+// Middleware to parse JSON
 app.use(express.json());
 
 const uri =
@@ -18,6 +37,16 @@ MongoClient.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
     favoritesCollection = db.collection("favorites");
   })
   .catch((error) => console.error(error));
+
+// GET route to retrieve all favorite locations
+app.get("/", async (req, res) => {
+  try {
+    return res.json({ message: "you have reached the server" });
+  } catch (error) {
+    console.error("Failed Index Request:", error);
+    return res.status(500).json({ error: "Failed Index Request" });
+  }
+});
 
 // GET route to retrieve all favorite locations
 app.get("/api/favorites", async (req, res) => {
@@ -86,7 +115,6 @@ app.delete("/api/favorites", async (req, res) => {
 app.get("/api/weather", async (req, res) => {
   const { lat, long } = req.query;
   const apiKey = "hLW5w3nqhwrbf2YT6IZVsUHNvrkoz90Z";
-  // const apiKey="Y2SjVrteA6vG8JwCUCq2B5NGd56XvzIi"
   const url = `https://api.tomorrow.io/v4/timelines?location=${lat},${long}&fields=temperature,temperatureApparent,temperatureMin,temperatureMax,windSpeed,humidity,sunriseTime,sunsetTime,visibility,cloudCover&units=imperial&timesteps=1d&apikey=${apiKey}`;
 
   try {
@@ -101,9 +129,10 @@ app.get("/api/weather", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch weather data" });
   }
 });
+
+// Hourly weather data route
 app.get("/api/hourly", async (req, res) => {
   const { lat, long } = req.query;
-  // const apiKey = "Y2SjVrteA6vG8JwCUCq2B5NGd56XvzIi";
   const apiKey = "hLW5w3nqhwrbf2YT6IZVsUHNvrkoz90Z";
   const url = `https://api.tomorrow.io/v4/timelines?location=${lat},${long}&fields=temperature,pressureSurfaceLevel,temperatureApparent,temperatureMin,temperatureMax,windSpeed,windDirection,humidity,pressureSeaLevel,uvIndex,weatherCode,precipitationProbability,precipitationType,visibility,cloudCover&endTime=nowPlus5d&timezone=America/Los_Angeles&units=imperial&timesteps=1h&apikey=${apiKey}`;
 

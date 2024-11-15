@@ -109,7 +109,7 @@ const WeatherApp: React.FC = () => {
             day: "numeric",
             year: "numeric",
           }),
-          status: item.values.cloudCover > 50 ? "Cloudy" : "Clear",
+          status: item.values.weathercode,
           maxTemp: `${item.values.temperatureMax}°F`,
           minTemp: `${item.values.temperatureMin}°F`,
           apparentTemp: `${item.values.temperatureApparent}°F`,

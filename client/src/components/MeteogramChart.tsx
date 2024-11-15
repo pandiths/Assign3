@@ -37,12 +37,15 @@ interface MeteogramProps {
 
 const Meteogram: React.FC<MeteogramProps> = ({ data }) => {
   // Get the start date from the first data point
+  if (!data[0]) {
+    window.location.reload();
+  }
   const startDate = new Date(data[0].date);
-  
+
   // ... (keeping all the data mapping functions the same)
   const temperatureData = data.map((point, index) => {
     const date = new Date(startDate);
-    date.setTime(startDate.getTime() + (index * 3600 * 1000));
+    date.setTime(startDate.getTime() + index * 3600 * 1000);
 
     return {
       x: date.getTime(),
@@ -53,7 +56,7 @@ const Meteogram: React.FC<MeteogramProps> = ({ data }) => {
 
   const humidityData = data.map((point, index) => {
     const date = new Date(startDate);
-    date.setTime(startDate.getTime() + (index * 3600 * 1000));
+    date.setTime(startDate.getTime() + index * 3600 * 1000);
 
     return {
       x: date.getTime(),
@@ -63,7 +66,7 @@ const Meteogram: React.FC<MeteogramProps> = ({ data }) => {
 
   const windSpeedData = data.map((point, index) => {
     const date = new Date(startDate);
-    date.setTime(startDate.getTime() + (index * 3600 * 1000));
+    date.setTime(startDate.getTime() + index * 3600 * 1000);
 
     return {
       x: date.getTime(),
@@ -73,7 +76,7 @@ const Meteogram: React.FC<MeteogramProps> = ({ data }) => {
 
   const apparentTemperatureData = data.map((point, index) => {
     const date = new Date(startDate);
-    date.setTime(startDate.getTime() + (index * 3600 * 1000));
+    date.setTime(startDate.getTime() + index * 3600 * 1000);
 
     return {
       x: date.getTime(),
@@ -83,7 +86,7 @@ const Meteogram: React.FC<MeteogramProps> = ({ data }) => {
 
   const sunriseData = data.map((point, index) => {
     const date = new Date(startDate);
-    date.setTime(startDate.getTime() + (index * 3600 * 1000));
+    date.setTime(startDate.getTime() + index * 3600 * 1000);
 
     return {
       x: date.getTime(),
@@ -93,7 +96,7 @@ const Meteogram: React.FC<MeteogramProps> = ({ data }) => {
 
   const sunsetData = data.map((point, index) => {
     const date = new Date(startDate);
-    date.setTime(startDate.getTime() + (index * 3600 * 1000));
+    date.setTime(startDate.getTime() + index * 3600 * 1000);
 
     return {
       x: date.getTime(),
@@ -104,7 +107,7 @@ const Meteogram: React.FC<MeteogramProps> = ({ data }) => {
   const options: Highcharts.Options = {
     chart: {
       type: "column",
-      spacing: [10, 10, 10, 10] // Add some overall chart spacing
+      spacing: [10, 10, 10, 10], // Add some overall chart spacing
     },
     title: {
       text: "Meteogram - Hourly Weather Forecast",
@@ -119,8 +122,8 @@ const Meteogram: React.FC<MeteogramProps> = ({ data }) => {
       tickInterval: 3600 * 1000,
       minTickInterval: 3600 * 1000,
       dateTimeLabelFormats: {
-        day: '%H:%M'
-      }
+        day: "%H:%M",
+      },
     },
     yAxis: [
       {
@@ -174,16 +177,16 @@ const Meteogram: React.FC<MeteogramProps> = ({ data }) => {
     },
     plotOptions: {
       column: {
-        pointPadding: 0.4,    // Increased from 0.2
-        groupPadding: 0.3,    // Increased from 0.1
+        pointPadding: 0.4, // Increased from 0.2
+        groupPadding: 0.3, // Increased from 0.1
         borderWidth: 0,
         pointInterval: 3600 * 1000,
-        maxPointWidth: 15,    // Added to control maximum width of bars
-        minPointLength: 3     // Added to ensure minimum visible bar size
+        maxPointWidth: 15, // Added to control maximum width of bars
+        minPointLength: 3, // Added to ensure minimum visible bar size
       },
       series: {
         pointInterval: 3600 * 1000,
-      }
+      },
     },
     series: [
       {

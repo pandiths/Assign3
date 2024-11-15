@@ -1,0 +1,13 @@
+runtime: python39 # Static file hosting on App Engine requires a runtime, here we use python39
+
+handlers:
+  - url: /static
+    static_dir: build/static
+
+  - url: /
+    static_files: build/index.html
+    upload: build/index.html
+
+  - url: /(.*)
+    static_files: build/\1
+    upload: build/(.*)
