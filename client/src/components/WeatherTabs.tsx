@@ -16,7 +16,6 @@ interface WeatherData {
   windSpeed: string;
   visibility: string;
   cloudCover: string;
-  weatherStatus?: string;
 }
 interface HourlyWeatherData {
   date: string;
@@ -36,6 +35,12 @@ interface FavoriteData {
   region: string;
   coordinates: { latitude: string; longitude: string } | null; // Added coordinates
   data: WeatherData[];
+}
+
+// Define a type for each weather status entry
+interface WeatherStatus {
+  description: string;
+  image: string;
 }
 
 interface WeatherTabsProps {
@@ -157,8 +162,18 @@ const WeatherTabs: React.FC<WeatherTabsProps> = ({
       return null; // Return null if the code is not found
     }
   }
+  function getWeatherDescription(code: number): string {
+    const condition = weatherStatues[code];
 
-  const weatherStatues: any = {
+    if (condition) {
+      return condition.description; // Return the description
+    } else {
+      console.warn(`No description found for weather code: ${code}`);
+      return "Description not available"; // Return a default message if the code is not found
+    }
+  }
+
+  const weatherStatues: { [key: number]: WeatherStatus } = {
     1000: {
       description: "Clear, Sunny",
       image:
@@ -236,7 +251,8 @@ const WeatherTabs: React.FC<WeatherTabsProps> = ({
     },
     6000: {
       description: "Freezing Drizzle",
-      image: "../weathercodes/freezing_drizzle.svg",
+      image:
+        "https://res.cloudinary.com/dzjnd5pcv/image/upload/v1731665495/freezing_drizzle_mi8yaw.svg",
     },
     6001: {
       description: "Freezing Rain",
@@ -274,16 +290,16 @@ const WeatherTabs: React.FC<WeatherTabsProps> = ({
         "https://res.cloudinary.com/dzjnd5pcv/image/upload/v1731647519/tstorm_nlsp7e.svg",
     },
   };
-  console.log(weatherStatues);
+
   return (
     <Container
       className={`mt-4 container-slide ${showDetails ? "show-details" : ""}`}
     >
       <div className={`tab-content ${hideTable ? "hidden" : ""}`}>
-        <h3 className="mb-3">
+        <h3 className="mb-3 text-center text-md-left">
           Weather Forecast {cityName ? `for ${cityName}, ${regionName}` : ""}
         </h3>
-        <Row className="mb-3 justify-content-end">
+        <Row className="mb-3 justify-content-center justify-content-md-end">
           <Col xs="auto">
             <Button
               variant="light"
@@ -293,15 +309,15 @@ const WeatherTabs: React.FC<WeatherTabsProps> = ({
               <span
                 className="material-symbols-outlined"
                 style={{
-                  color: isFavorite ? "yellow" : "inherit", // Yellow color for filled star
-                  fontSize: "24px", // Optional, adjust the size as needed
+                  color: isFavorite ? "yellow" : "inherit",
+                  fontSize: "24px",
                 }}
               >
                 {isFavorite ? "star" : "star_border"}
               </span>
             </Button>
           </Col>
-          <Col xs="auto">
+          <Col xs="auto" className="mt-2 mt-md-0">
             <Button
               variant="light"
               className="d-flex align-items-center justify-content-center"
@@ -345,19 +361,16 @@ const WeatherTabs: React.FC<WeatherTabsProps> = ({
                     </td>
                     <td>
                       <img
-                        style={{ width: "24px" }}
+                        style={{ width: "30px", height: "30px" }}
                         src={
-                          weatherStatues[
-                            data.weatherStatus ? data.weatherStatus : ""
-                          ].image
+                          getWeatherImageSrc(Number(data.status)) ||
+                          "https://res.cloudinary.com/dzjnd5pcv/image/upload/v1731614830/clear_day_kvslmo.svg"
                         }
-                        alt=""
-                      />
-                      {
-                        weatherStatues[
-                          data.weatherStatus ? data.weatherStatus : ""
-                        ].description
-                      }
+                        alt="Weather status"
+                      />{" "}
+                      <span style={{ fontSize: "10px" }}>
+                        {getWeatherDescription(Number(data.status))}
+                      </span>
                     </td>
                     <td>{data.maxTemp}</td>
                     <td>{data.minTemp}</td>
@@ -377,19 +390,19 @@ const WeatherTabs: React.FC<WeatherTabsProps> = ({
           </Tab>
         </Tabs>
       </div>
-      {/* <TemperatureChart data={weatherData}/> for debug*/}
+
       {showDetails && hideTable && selectedData && coordinates && (
-        <div className="details-content">
+        <div className="details-content mt-3">
           <WeatherDetails
             date={selectedData.date}
             weatherData={selectedData}
             latitude={parseFloat(coordinates.latitude)}
             longitude={parseFloat(coordinates.longitude)}
-            googleMapsApiKey="AIzaSyD9SRVSolqPEYTy7s4fCYSTLw7wbZMEz6M" // replace with your actual API key
+            googleMapsApiKey="AIzaSyD9SRVSolqPEYTy7s4fCYSTLw7wbZMEz6M"
             onBackToList={handleBackToList}
-            cityName={cityName} // Use state value directly
-            regionName={regionName} // Use state value directly
-            temperature={selectedData.maxTemp} // Assuming maxTemp represents temperature here
+            cityName={cityName}
+            regionName={regionName}
+            temperature={selectedData.maxTemp}
           />
         </div>
       )}
