@@ -38,7 +38,7 @@ interface MeteogramProps {
 const Meteogram: React.FC<MeteogramProps> = ({ data }) => {
   // Get the start date from the first data point
   if (!data[0]) {
-    window.location.reload();
+    return <>loading</>;
   }
   const startDate = new Date(data[0].date);
 
@@ -213,7 +213,7 @@ const Meteogram: React.FC<MeteogramProps> = ({ data }) => {
                 ? "https://openweathermap.org/img/wn/04d.png"
                 : "https://openweathermap.org/img/wn/01d.png";
             return `<div style="display: flex; flex-direction: column; align-items: center;">
-                      <img src="${icon}" style="width: 30px; height: 30px;margin-bottom:5px;background-color:grey" />
+                      <img src="${icon}" style="width: 0px; height: 0px;margin-bottom:5px;background-color:grey" />
                    </div>`;
           },
           verticalAlign: "top",

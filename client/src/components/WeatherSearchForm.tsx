@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Form, Button, Container } from "react-bootstrap";
 
 interface WeatherSearchFormProps {
@@ -35,6 +35,97 @@ const WeatherSearchForm: React.FC<WeatherSearchFormProps> = ({
   const [isFormValid, setIsFormValid] = useState(false);
   const [currentLocationEnabled, setCurrentLocationEnabled] = useState(false);
 
+  // Refs to hold input elements for autocomplete
+  const streetInputRef = useRef<HTMLInputElement>(null);
+  const cityInputRef = useRef<HTMLInputElement>(null);
+  const stateInputRef = useRef<HTMLInputElement>(null);
+
+  // Initialize autocomplete for street, city, and state
+  const initAutocomplete = () => {
+    if (window.google) {
+      const options = {
+        types: ["address"], // Restrict results to addresses only
+      };
+
+      // Create autocomplete for street
+      if (streetInputRef.current) {
+        const streetAutocomplete = new window.google.maps.places.Autocomplete(
+          streetInputRef.current,
+          options
+        );
+        streetAutocomplete.addListener("place_changed", () => {
+          const place = streetAutocomplete.getPlace();
+          if (place.address_components) {
+            const street = place.address_components.find((component: any) =>
+              component.types.includes("route")
+            );
+            const city = place.address_components.find((component: any) =>
+              component.types.includes("locality")
+            );
+            const state = place.address_components.find((component: any) =>
+              component.types.includes("administrative_area_level_1")
+            );
+
+            setFormData({
+              street: street ? street.long_name : "",
+              city: city ? city.long_name : "",
+              state: state ? state.long_name : "",
+            });
+          }
+        });
+      }
+
+      // Create autocomplete for city
+      if (cityInputRef.current) {
+        const cityAutocomplete = new window.google.maps.places.Autocomplete(
+          cityInputRef.current,
+          options
+        );
+        cityAutocomplete.addListener("place_changed", () => {
+          const place = cityAutocomplete.getPlace();
+          if (place.address_components) {
+            const city = place.address_components.find((component: any) =>
+              component.types.includes("locality")
+            );
+            setFormData({ ...formData, city: city ? city.long_name : "" });
+          }
+        });
+      }
+
+      // Create autocomplete for state
+      if (stateInputRef.current) {
+        const stateAutocomplete = new window.google.maps.places.Autocomplete(
+          stateInputRef.current,
+          options
+        );
+        stateAutocomplete.addListener("place_changed", () => {
+          const place = stateAutocomplete.getPlace();
+          if (place.address_components) {
+            const state = place.address_components.find((component: any) =>
+              component.types.includes("administrative_area_level_1")
+            );
+            setFormData({ ...formData, state: state ? state.long_name : "" });
+          }
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    // Initialize the autocomplete when the component is mounted
+    if (window.google) {
+      initAutocomplete();
+    } else {
+      const script = document.createElement("script");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyCeTyB1kVO13TCxdrJNmhugdYC68JNAsFM&libraries=places&callback=initAutocomplete`;
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+      //@ts-ignore
+      window.initAutocomplete = initAutocomplete; // Attach callback to global window object
+    }
+  }, []);
+
   useEffect(() => {
     const isValid =
       (formData.street.trim() !== "" &&
@@ -47,13 +138,11 @@ const WeatherSearchForm: React.FC<WeatherSearchFormProps> = ({
   const handleInputChange = (e: React.ChangeEvent<any>) => {
     const { name, value } = e.target as HTMLInputElement | HTMLSelectElement;
     setFormData({ ...formData, [name]: value });
-
-    if (name === "city" && value.trim() !== "")
-      setErrors({ ...errors, city: false });
-    if (name === "street" && value.trim() !== "")
-      setErrors({ ...errors, street: false });
-    if (name === "state" && value.trim() !== "")
-      setErrors({ ...errors, state: false });
+    setErrors({
+      city: value.trim() === "",
+      state: value.trim() === "",
+      street: value.trim() === "",
+    });
   };
 
   const fetchCurrentLocation = async () => {
@@ -72,7 +161,6 @@ const WeatherSearchForm: React.FC<WeatherSearchFormProps> = ({
   const handleCheckboxChange = () => {
     setCurrentLocationEnabled((prev) => {
       const newValue = !prev;
-
       if (newValue) {
         // Clear form data and errors when checkbox is checked for autodetect
         setFormData({ street: "", city: "", state: "" });
@@ -82,7 +170,6 @@ const WeatherSearchForm: React.FC<WeatherSearchFormProps> = ({
         // Reset location if unchecked
         onLocationFetch("", "");
       }
-
       return newValue;
     });
   };
@@ -107,7 +194,7 @@ const WeatherSearchForm: React.FC<WeatherSearchFormProps> = ({
 
       const wholeAddress = `${street}, ${city}, ${state}`;
       try {
-        const apiKey = "AIzaSyDrnXf1KrA97FbpOdEqpqDE9yTL2rjjoiA";
+        const apiKey = "AIzaSyCeTyB1kVO13TCxdrJNmhugdYC68JNAsFM";
         const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
           wholeAddress
         )}&key=${apiKey}`;
@@ -140,157 +227,90 @@ const WeatherSearchForm: React.FC<WeatherSearchFormProps> = ({
     <Container className="mt-5 p-4 border rounded shadow-sm bg-light">
       <h1 className="text-center mb-4">
         Weather Search{" "}
-        <span role="img" aria-label="sun">
-          ☀️
-        </span>
+        <img
+          style={{ width: "34px", marginBottom: "10px" }}
+          src="https://res.cloudinary.com/dzjnd5pcv/image/upload/v1731658205/cloud-sun_1_rdecx5.svg"
+          alt=""
+        />
       </h1>
 
-      <Form onSubmit={handleSubmit} onReset={handleReset}>
-        <Form.Group
-          controlId="street"
-          className="d-flex flex-row justify-content-center align-items-center"
-        >
+      <Form onSubmit={handleSubmit} onReset={handleReset} autoComplete="on">
+        <Form.Group className="d-flex flex-row justify-content-center align-items-center mt-5">
           <Form.Label>
             Street<span className="text-danger">*</span>
           </Form.Label>
-          <Form.Control
-            type="text"
-            className="mx-2 w-50"
-            name="street"
-            value={formData.street}
-            onChange={handleInputChange}
-            disabled={currentLocationEnabled}
-            required={!currentLocationEnabled}
-          />
+          <div className="w-50 mx-2 d-flex flex-column">
+            <Form.Control
+              type="text"
+              name="street"
+              value={formData.street}
+              isInvalid={errors.street}
+              onChange={handleInputChange}
+              ref={streetInputRef}
+              autoComplete="street-address"
+            />
+            <Form.Control.Feedback type="invalid">
+              Please enter a street.
+            </Form.Control.Feedback>
+          </div>
         </Form.Group>
 
-        <Form.Group
-          controlId="city"
-          className="d-flex flex-row justify-content-center align-items-center"
-        >
+        <Form.Group className="d-flex flex-row justify-content-center align-items-center mt-2">
           <Form.Label>
             City<span className="text-danger">*</span>
           </Form.Label>
-          <Form.Control
-            type="text"
-            className="mx-2 w-50"
-            name="city"
-            value={formData.city}
-            onChange={handleInputChange}
-            isInvalid={errors.city}
-            disabled={currentLocationEnabled}
-            required={!currentLocationEnabled}
-          />
-          <Form.Control.Feedback type="invalid">
-            Please enter a valid city
-          </Form.Control.Feedback>
+          <div className="w-50 mx-2 d-flex flex-column">
+            <Form.Control
+              type="text"
+              name="city"
+              value={formData.city}
+              isInvalid={errors.city}
+              onChange={handleInputChange}
+              ref={cityInputRef}
+              autoComplete="city"
+            />
+            <Form.Control.Feedback type="invalid">
+              Please enter a city.
+            </Form.Control.Feedback>
+          </div>
         </Form.Group>
 
-        <Form.Group
-          controlId="state"
-          className="d-flex flex-row justify-content-center align-items-center"
-        >
+        <Form.Group className="d-flex flex-row justify-content-center align-items-center mt-2">
           <Form.Label>
             State<span className="text-danger">*</span>
           </Form.Label>
-          <Form.Select
-            name="state"
-            value={formData.state}
-            onChange={handleInputChange}
-            className="mx-2 w-50"
-            disabled={currentLocationEnabled}
-            required={!currentLocationEnabled}
-          >
-            <option value="">Select your state</option>
-            <option value="California">California</option>
-            <option value="Texas">Texas</option>
-            <option value="New York">New York</option>
-            <option value="Alabama">Alabama</option>
-            <option value="Alaska">Alaska</option>
-            <option value="Arizona">Arizona</option>
-            <option value="Arkansas">Arkansas</option>
-            <option value="California">California</option>
-            <option value="Colorado">Colorado</option>
-            <option value="Connecticut">Connecticut</option>
-            <option value="Delaware">Delaware</option>
-            <option value="Florida">Florida</option>
-            <option value="Georgia">Georgia</option>
-            <option value="Hawaii">Hawaii</option>
-            <option value="Idaho">Idaho</option>
-            <option value="Illinois">Illinois</option>
-            <option value="Indiana">Indiana</option>
-            <option value="Iowa">Iowa</option>
-            <option value="Kansas">Kansas</option>
-            <option value="Kentucky">Kentucky</option>
-            <option value="Louisiana">Louisiana</option>
-            <option value="Maine">Maine</option>
-            <option value="Maryland">Maryland</option>
-            <option value="Massachusetts">Massachusetts</option>
-            <option value="Michigan">Michigan</option>
-            <option value="Minnesota">Minnesota</option>
-            <option value="Mississippi">Mississippi</option>
-            <option value="Missouri">Missouri</option>
-            <option value="Montana">Montana</option>
-            <option value="Nebraska">Nebraska</option>
-            <option value="Nevada">Nevada</option>
-            <option value="New Hampshire">New Hampshire</option>
-            <option value="New Jersey">New Jersey</option>
-            <option value="New Mexico">New Mexico</option>
-            <option value="New York">New York</option>
-            <option value="North Carolina">North Carolina</option>
-            <option value="North Dakota">North Dakota</option>
-            <option value="Ohio">Ohio</option>
-            <option value="Oklahoma">Oklahoma</option>
-            <option value="Oregon">Oregon</option>
-            <option value="Pennsylvania">Pennsylvania</option>
-            <option value="Rhode Island">Rhode Island</option>
-            <option value="South Carolina">South Carolina</option>
-            <option value="South Dakota">South Dakota</option>
-            <option value="Tennessee">Tennessee</option>
-            <option value="Texas">Texas</option>
-            <option value="Utah">Utah</option>
-            <option value="Vermont">Vermont</option>
-            <option value="Virginia">Virginia</option>
-            <option value="Washington">Washington</option>
-            <option value="West Virginia">West Virginia</option>
-            <option value="Wisconsin">Wisconsin</option>
-            <option value="Wyoming">Wyoming</option>
-          </Form.Select>
+          <div className="w-50 mx-2 d-flex flex-column">
+            <Form.Control
+              type="text"
+              name="state"
+              value={formData.state}
+              isInvalid={errors.state}
+              onChange={handleInputChange}
+              ref={stateInputRef}
+              autoComplete="state"
+            />
+            <Form.Control.Feedback type="invalid">
+              Please enter a state.
+            </Form.Control.Feedback>
+          </div>
         </Form.Group>
 
-        <hr />
-
-        <Form.Group className="d-flex flex-row justify-content-center align-items-center">
-          <p>
-            Autodetect Location <sup style={{ color: "red" }}>*</sup>{" "}
-          </p>
+        <Form.Group className="d-flex flex-row justify-content-center align-items-center ">
           <Form.Check
             type="checkbox"
-            name="currentLocation"
-            className="mx-2 mt-0"
-            checked={currentLocationEnabled}
+            label="Use current location"
             onChange={handleCheckboxChange}
+            checked={currentLocationEnabled}
           />
-          <p>Current Location</p>
         </Form.Group>
 
-        <div className="d-flex justify-content-center">
+        <div className="text-center mt-4">
           <Button
             type="submit"
-            variant="primary"
-            className="d-flex align-items-center justify-content-center"
+            className="btn btn-primary w-50"
             disabled={!isFormValid}
           >
-            <span className="material-symbols-outlined me-2">search</span>
             Search
-          </Button>
-          <Button
-            type="reset"
-            variant="light"
-            className="d-flex align-items-center justify-content-center mx-2"
-          >
-            <span className="material-symbols-outlined me-2">clear_all</span>
-            Clear
           </Button>
         </div>
       </Form>

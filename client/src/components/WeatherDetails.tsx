@@ -132,7 +132,7 @@ const WeatherDetails: React.FC<WeatherDetailsProps> = ({
       </div>
 
       {isLoaded ? (
-        <div className="mt-4 border rounded-3 shadow-sm">
+        <div className="my-4 border rounded-3 shadow-sm">
           <GoogleMap
             mapContainerStyle={containerStyle}
             center={center}

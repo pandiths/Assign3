@@ -100,6 +100,7 @@ const WeatherApp: React.FC = () => {
         if (!response.ok) throw new Error("Network response was not ok");
 
         const weatherApiResponse = await response.json();
+        console.log(weatherApiResponse);
         const intervals = weatherApiResponse.data.timelines[0].intervals;
 
         const formattedData = intervals.map((item: any) => ({
@@ -109,7 +110,8 @@ const WeatherApp: React.FC = () => {
             day: "numeric",
             year: "numeric",
           }),
-          status: item.values.weathercode,
+          weatherStatus: item.values.weatherCode,
+          status: item.values.cloudcover > 50 ? "Cloudy" : "Clear",
           maxTemp: `${item.values.temperatureMax}°F`,
           minTemp: `${item.values.temperatureMin}°F`,
           apparentTemp: `${item.values.temperatureApparent}°F`,
