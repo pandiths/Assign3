@@ -110,7 +110,6 @@ const WeatherApp: React.FC = () => {
             day: "numeric",
             year: "numeric",
           }),
-
           status: item.values.weatherCode,
           maxTemp: `${item.values.temperatureMax}°F`,
           minTemp: `${item.values.temperatureMin}°F`,

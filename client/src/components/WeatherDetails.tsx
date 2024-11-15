@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Container, Table, Button, Row, Col } from "react-bootstrap";
-import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
+import { GoogleMap, useJsApiLoader } from "@react-google-maps/api";
 
 interface WeatherData {
   status: string;
@@ -55,12 +55,37 @@ const WeatherDetails: React.FC<WeatherDetailsProps> = ({
 }) => {
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: googleMapsApiKey,
+    libraries: ["marker"],
   });
 
-  const center = {
-    lat: latitude,
-    lng: longitude,
-  };
+  const mapRef = useRef(null);
+
+  useEffect(() => {
+    if (isLoaded && mapRef.current) {
+      const map = new google.maps.Map(mapRef.current, {
+        center: { lat: latitude, lng: longitude },
+        zoom: 10,
+        mapId: "DEMO_MAP_ID", // Replace with your actual mapId if you have one
+      });
+
+      if (google.maps.marker && google.maps.marker.AdvancedMarkerElement) {
+        // Use AdvancedMarkerElement if available
+        new google.maps.marker.AdvancedMarkerElement({
+          map,
+          position: { lat: latitude, lng: longitude },
+        });
+      } else {
+        // Fallback to standard Marker if AdvancedMarkerElement is not available
+        console.warn(
+          "AdvancedMarkerElement is not available, using standard Marker instead."
+        );
+        new google.maps.Marker({
+          map,
+          position: { lat: latitude, lng: longitude },
+        });
+      }
+    }
+  }, [isLoaded, latitude, longitude]);
 
   const tweetWeatherDetails = () => {
     const tweetText = `Weather Details for ${cityName}, ${regionName}: Status: ${weatherData.status}, Temperature: ${temperature}°C, Humidity: ${weatherData.humidity}%, Wind Speed: ${weatherData.windSpeed} km/h.`;
@@ -83,19 +108,10 @@ const WeatherDetails: React.FC<WeatherDetailsProps> = ({
     { label: "Cloud Cover", value: weatherData.cloudCover || "N/A" },
   ];
 
-  const redMarkerIcon = {
-    path: "M12 2C8.686 2 6 4.686 6 8c0 3.686 3.314 6.742 6 10.936C14.686 14.742 18 11.686 18 8c0-3.314-2.686-6-6-6z", // SVG path for a map pin shape
-    fillColor: "red",
-    fillOpacity: 1,
-    scale: 1.5,
-    strokeColor: "black",
-    strokeWeight: 1,
-  };
-
   return (
     <Container className="mt-4">
       <Row className="justify-content-between align-items-center mb-3">
-        <Col xs="auto">
+        <Col xs={4} md="auto" className="text-center mb-3 mb-md-0">
           <Button
             className="d-flex align-items-center justify-content-center"
             variant="light"
@@ -105,10 +121,18 @@ const WeatherDetails: React.FC<WeatherDetailsProps> = ({
             List
           </Button>
         </Col>
-        <Col xs="auto" className="text-center">
-          <h4 className="m-0">
+        <Col xs={8} md="auto" className="text-center">
+          <h4
+            className="m-0 d-inline-flex align-items-center justify-content-center"
+            style={{ fontSize: "1rem" }}
+          >
             {formatDate(date)}
-            <Button onClick={tweetWeatherDetails} variant="light">
+            <Button
+              onClick={tweetWeatherDetails}
+              variant="light"
+              className="ml-2"
+              style={{ fontSize: "0.875rem" }}
+            >
               X
             </Button>
           </h4>
@@ -132,15 +156,11 @@ const WeatherDetails: React.FC<WeatherDetailsProps> = ({
       </div>
 
       {isLoaded ? (
-        <div className="my-4 border rounded-3 shadow-sm">
-          <GoogleMap
-            mapContainerStyle={containerStyle}
-            center={center}
-            zoom={10}
-          >
-            <Marker position={center} icon={redMarkerIcon} />
-          </GoogleMap>
-        </div>
+        <div
+          className="mt-4 border rounded-3 shadow-sm w-100"
+          style={containerStyle}
+          ref={mapRef}
+        ></div>
       ) : (
         <p className="text-center p-3">Loading map...</p>
       )}

@@ -369,8 +369,7 @@ const WeatherTabs: React.FC<WeatherTabsProps> = ({
                         alt="Weather status"
                       />{" "}
                       <span style={{ fontSize: "10px" }}>
-                        {/* {getWeatherDescription(Number(data.status))} */}
-                        {data.status}
+                        {getWeatherDescription(Number(data.status))}
                       </span>
                     </td>
                     <td>{data.maxTemp}</td>

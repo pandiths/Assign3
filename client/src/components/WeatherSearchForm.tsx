@@ -139,9 +139,9 @@ const WeatherSearchForm: React.FC<WeatherSearchFormProps> = ({
     const { name, value } = e.target as HTMLInputElement | HTMLSelectElement;
     setFormData({ ...formData, [name]: value });
     setErrors({
-      city: value.trim() === "",
-      state: value.trim() === "",
-      street: value.trim() === "",
+      city: value.trim() == "",
+      state: value.trim() == "",
+      street: value.trim() == "",
     });
   };
 
@@ -230,20 +230,22 @@ const WeatherSearchForm: React.FC<WeatherSearchFormProps> = ({
         <img
           style={{ width: "34px", marginBottom: "10px" }}
           src="https://res.cloudinary.com/dzjnd5pcv/image/upload/v1731658205/cloud-sun_1_rdecx5.svg"
-          alt=""
+          alt="Weather Icon"
         />
       </h1>
 
       <Form onSubmit={handleSubmit} onReset={handleReset} autoComplete="on">
-        <Form.Group className="d-flex flex-row justify-content-center align-items-center mt-5">
-          <Form.Label>
+        {/* Street */}
+        <Form.Group className="row align-items-center mb-3">
+          <Form.Label className="col-12 col-md-3 text-center text-md-right">
             Street<span className="text-danger">*</span>
           </Form.Label>
-          <div className="w-50 mx-2 d-flex flex-column">
+          <div className="col-12 col-md-6">
             <Form.Control
               type="text"
               name="street"
               value={formData.street}
+              disabled={currentLocationEnabled}
               isInvalid={errors.street}
               onChange={handleInputChange}
               ref={streetInputRef}
@@ -255,15 +257,17 @@ const WeatherSearchForm: React.FC<WeatherSearchFormProps> = ({
           </div>
         </Form.Group>
 
-        <Form.Group className="d-flex flex-row justify-content-center align-items-center mt-2">
-          <Form.Label>
+        {/* City */}
+        <Form.Group className="row align-items-center mb-3">
+          <Form.Label className="col-12 col-md-3 text-center text-md-right">
             City<span className="text-danger">*</span>
           </Form.Label>
-          <div className="w-50 mx-2 d-flex flex-column">
+          <div className="col-12 col-md-6">
             <Form.Control
               type="text"
               name="city"
               value={formData.city}
+              disabled={currentLocationEnabled}
               isInvalid={errors.city}
               onChange={handleInputChange}
               ref={cityInputRef}
@@ -275,15 +279,17 @@ const WeatherSearchForm: React.FC<WeatherSearchFormProps> = ({
           </div>
         </Form.Group>
 
-        <Form.Group className="d-flex flex-row justify-content-center align-items-center mt-2">
-          <Form.Label>
+        {/* State */}
+        <Form.Group className="row align-items-center mb-3">
+          <Form.Label className="col-12 col-md-3 text-center text-md-right">
             State<span className="text-danger">*</span>
           </Form.Label>
-          <div className="w-50 mx-2 d-flex flex-column">
+          <div className="col-12 col-md-6">
             <Form.Control
               type="text"
               name="state"
               value={formData.state}
+              disabled={currentLocationEnabled}
               isInvalid={errors.state}
               onChange={handleInputChange}
               ref={stateInputRef}
@@ -295,23 +301,46 @@ const WeatherSearchForm: React.FC<WeatherSearchFormProps> = ({
           </div>
         </Form.Group>
 
-        <Form.Group className="d-flex flex-row justify-content-center align-items-center ">
-          <Form.Check
-            type="checkbox"
-            label="Use current location"
-            onChange={handleCheckboxChange}
-            checked={currentLocationEnabled}
-          />
+        {/* Autodetect Location */}
+        <Form.Group className="d-flex flex-row align-items-center mb-3 justify-content-center">
+          <p className="text-center text-md-right mb-0">
+            Autodetect Location <sup className="text-danger">*</sup>
+          </p>
+          <div className="d-flex align-items-center justify-content-center">
+            <Form.Check
+              type="checkbox"
+              name="currentLocation"
+              className="mx-2"
+              checked={currentLocationEnabled}
+              onChange={handleCheckboxChange}
+            />
+            <p className="mb-0">Current Location</p>
+          </div>
         </Form.Group>
 
-        <div className="text-center mt-4">
-          <Button
-            type="submit"
-            className="btn btn-primary w-50"
-            disabled={!isFormValid}
-          >
-            Search
-          </Button>
+        {/* Buttons */}
+        <div className="row justify-content-center mt-4">
+          <div className="col-6 col-md-3 d-flex justify-content-center">
+            <Button
+              type="submit"
+              variant="primary"
+              className="w-100 d-flex align-items-center justify-content-center"
+              disabled={!isFormValid}
+            >
+              <span className="material-symbols-outlined me-2">search</span>
+              Search
+            </Button>
+          </div>
+          <div className="col-6 col-md-3 d-flex justify-content-center">
+            <Button
+              type="reset"
+              variant="light"
+              className="w-100 d-flex align-items-center justify-content-center"
+            >
+              <span className="material-symbols-outlined me-2">clear_all</span>
+              Clear
+            </Button>
+          </div>
         </div>
       </Form>
     </Container>
