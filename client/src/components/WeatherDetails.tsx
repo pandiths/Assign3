@@ -88,7 +88,7 @@ const WeatherDetails: React.FC<WeatherDetailsProps> = ({
   }, [isLoaded, latitude, longitude]);
 
   const tweetWeatherDetails = () => {
-    const tweetText = `The temperature in  ${cityName}, ${regionName}, on ${date} is Temperature: ${temperature}°C, Humidity: ${weatherData.humidity}%, Wind Speed: ${weatherData.windSpeed} km/h and the condisitons are clear`;
+    const tweetText = `The temperature in  ${cityName}, ${regionName}, on ${date} is Temperature: ${temperature}°C, and the conditions are clear`;
     const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
       tweetText
     )}&hashtags=CSCI571WeatherForecast`;
